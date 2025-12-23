@@ -1,0 +1,169 @@
+{%extends 'index.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+    <div class="mb-8">
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2">DASHBOARD OVERVIEW</h2>
+        <p class="text-gray-400">Real-time business intelligence and metrics</p>
+    </div>
+    <!-- Main Metrics -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+        <!-- Total Customers -->
+        <div class="bg-[#1a1a1f] rounded-xl p-4 sm:p-6 border border-gray-800">
+            <div class="flex items-start justify-between mb-4">
+                <div class="p-3 bg-green-500 bg-opacity-10 rounded-lg">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </div>
+                <span class="text-green-500 text-sm font-semibold"> +12%</span>
+            </div>
+            <div class="text-gray-400 text-xs sm:text-sm mb-1">TOTAL CUSTOMERS</div>
+            <div class="text-white text-2xl sm:text-3xl font-bold">10</div>
+        </div>
+        <!-- Total Orders -->
+        <div class="bg-[#1a1a1f] rounded-xl p-4 sm:p-6 border border-gray-800">
+            <div class="flex items-start justify-between mb-4">
+                <div class="p-3 bg-blue-500 bg-opacity-10 rounded-lg">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </div>
+                <span class="text-green-500 text-sm font-semibold"> +8%</span>
+            </div>
+            <div class="text-gray-400 text-xs sm:text-sm mb-1">TOTAL ORDERS</div>
+            <div class="text-white text-2xl sm:text-3xl font-bold">20</div>
+        </div>
+        <!-- Total Revenue -->
+        <div class="bg-[#1a1a1f] rounded-xl p-4 sm:p-6 border border-gray-800">
+            <div class="flex items-start justify-between mb-4">
+                <div class="p-3 bg-yellow-500 bg-opacity-10 rounded-lg">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <span class="text-green-500 text-sm font-semibold"> +15%</span>
+            </div>
+            <div class="text-gray-400 text-xs sm:text-sm mb-1">TOTAL REVENUE</div>
+            <div class="text-white text-2xl sm:text-3xl font-bold">$2,717.24</div>
+        </div>
+        <!-- Total Products -->
+        <div class="bg-[#1a1a1f] rounded-xl p-4 sm:p-6 border border-gray-800">
+            <div class="flex items-start justify-between mb-4">
+                <div class="p-3 bg-blue-500 bg-opacity-10 rounded-lg">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                </div>
+                <span class="text-green-500 text-sm font-semibold"> +3%</span>
+            </div>
+            <div class="text-gray-400 text-xs sm:text-sm mb-1">TOTAL PRODUCTS</div>
+            <div class="text-white text-2xl sm:text-3xl font-bold">{{ total_products }}</div>
+        </div>
+    </div>
+    <!-- Secondary Metrics -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+        <div class="bg-[#1a1a1f] rounded-xl p-4 sm:p-5 border border-gray-800">
+            <div class="text-gray-400 text-xs sm:text-sm mb-2">Today's Orders</div>
+            <div class="text-white text-xl sm:text-2xl font-bold">0</div>
+        </div>
+        <div class="bg-[#1a1a1f] rounded-xl p-4 sm:p-5 border border-gray-800">
+            <div class="text-gray-400 text-xs sm:text-sm mb-2">Today's Revenue</div>
+            <div class="text-white text-xl sm:text-2xl font-bold">$0</div>
+        </div>
+        <div class="bg-[#1a1a1f] rounded-xl p-4 sm:p-5 border border-yellow-500 border-opacity-30">
+            <div class="text-gray-400 text-xs sm:text-sm mb-2">Pending Orders</div>
+            <div class="text-yellow-500 text-xl sm:text-2xl font-bold">2</div>
+        </div>
+        <div class="bg-[#1a1a1f] rounded-xl p-4 sm:p-5 border border-red-500 border-opacity-30">
+            <div class="text-gray-400 text-xs sm:text-sm mb-2">Low Stock Alerts</div>
+            <div class="text-red-500 text-xl sm:text-2xl font-bold">2</div>
+        </div>
+    </div>
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <!-- Sales Trend -->
+        <div class="bg-[#1a1a1f] rounded-xl p-4 sm:p-6 border border-gray-800">
+            <h3 class="text-white text-base sm:text-lg font-semibold mb-4">Sales Trend (7 Days)</h3>
+            <div class="h-48 sm:h-64 flex items-end justify-between gap-1 sm:gap-2">
+                <div class="flex-1 bg-[#b48cf2] bg-opacity-20 rounded-t-lg" style="height: 45%"></div>
+                <div class="flex-1 bg-[#b48cf2] bg-opacity-20 rounded-t-lg" style="height: 60%"></div>
+                <div class="flex-1 bg-[#b48cf2] bg-opacity-20 rounded-t-lg" style="height: 75%"></div>
+                <div class="flex-1 bg-[#b48cf2] bg-opacity-20 rounded-t-lg" style="height: 55%"></div>
+                <div class="flex-1 bg-[#b48cf2] bg-opacity-20 rounded-t-lg" style="height: 85%"></div>
+                <div class="flex-1 bg-[#b48cf2] bg-opacity-20 rounded-t-lg" style="height: 70%"></div>
+                <div class="flex-1 bg-[#b48cf2] rounded-t-lg" style="height: 90%"></div>
+            </div>
+            <div class="flex justify-between mt-4 text-xs text-gray-500">
+                <span>Mon</span>
+                <span>Tue</span>
+                <span>Wed</span>
+                <span>Thu</span>
+                <span>Fri</span>
+                <span>Sat</span>
+                <span>Sun</span>
+            </div>
+        </div>
+        <!-- Top Selling Products -->
+        <div class="bg-[#1a1a1f] rounded-xl p-4 sm:p-6 border border-gray-800">
+            <h3 class="text-white text-base sm:text-lg font-semibold mb-4">Top Selling Products</h3>
+            <div class="space-y-3 sm:space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-[#b48cf2] bg-opacity-10 rounded-lg"></div>
+                        <div>
+                            <div class="text-white text-xs sm:text-sm font-medium">Product A</div>
+                            <div class="text-gray-500 text-xs">120 sold</div>
+                        </div>
+                    </div>
+                    <div class="text-green-500 text-xs sm:text-sm font-semibold">$1,200</div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-[#b48cf2] bg-opacity-10 rounded-lg"></div>
+                        <div>
+                            <div class="text-white text-xs sm:text-sm font-medium">Product B</div>
+                            <div class="text-gray-500 text-xs">95 sold</div>
+                        </div>
+                    </div>
+                    <div class="text-green-500 text-xs sm:text-sm font-semibold">$950</div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-[#b48cf2] bg-opacity-10 rounded-lg"></div>
+                        <div>
+                            <div class="text-white text-xs sm:text-sm font-medium">Product C</div>
+                            <div class="text-gray-500 text-xs">78 sold</div>
+                        </div>
+                    </div>
+                    <div class="text-green-500 text-xs sm:text-sm font-semibold">$780</div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-[#b48cf2] bg-opacity-10 rounded-lg"></div>
+                        <div>
+                            <div class="text-white text-xs sm:text-sm font-medium">Product D</div>
+                            <div class="text-gray-500 text-xs">62 sold</div>
+                        </div>
+                    </div>
+                    <div class="text-green-500 text-xs sm:text-sm font-semibold">$620</div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-[#b48cf2] bg-opacity-10 rounded-lg"></div>
+                        <div>
+                            <div class="text-white text-xs sm:text-sm font-medium">Product E</div>
+                            <div class="text-gray-500 text-xs">45 sold</div>
+                        </div>
+                    </div>
+                    <div class="text-green-500 text-xs sm:text-sm font-semibold">$450</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{%endblock%}
