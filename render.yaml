@@ -1,0 +1,24 @@
+databases:
+  - name: radhirra-db
+    databaseName: radhirra_db
+    user: radhirra_user
+
+services:
+  - type: web
+    name: radhirra-admin
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn backend.wsgi:application"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: radhirra-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CLOUDINARY_CLOUD_NAME
+        value: ddlx2h9hr
+      - key: CLOUDINARY_API_KEY
+        value: 
+      - key: CLOUDINARY_API_SECRET
+        value: 
