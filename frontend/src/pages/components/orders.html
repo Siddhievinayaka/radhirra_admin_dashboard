@@ -1,4 +1,5 @@
 {% extends 'index.html' %}
+{% load static %}
 
 {% block content %}
 <div class="container mx-auto px-4 py-8 max-w-7xl">
@@ -7,38 +8,42 @@
     <h1 class="text-3xl font-bold text-purple-500 mb-2">ORDER MANAGEMENT</h1>
     <p class="text-gray-400">Track and manage all customer orders</p>
   </div>
+  
   <!-- Search and Filter -->
   <div class="mb-6 flex flex-col sm:flex-row gap-4" style="background-color: #1a1a1f; padding: 1.5rem; border-radius: 0.5rem;">
-    <input type="text" id="orderSearchInput" placeholder="Search by order ID or customer name..." class="flex-1 px-4 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500" />
-    <select id="orderStatusFilter" class="px-4 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
-      <option value="">All</option>
+    <input type="text" id="orderSearch" placeholder="Search by order ID or customer name..." class="flex-1 px-4 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500" />
+    <select id="statusFilter" class="px-4 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+      <option value="">All Orders</option>
+      <option value="completed">Completed</option>
       <option value="pending">Pending</option>
-      <option value="packed">Packed</option>
-      <option value="shipped">Shipped</option>
-      <option value="out">Out</option>
-      <option value="delivered">Delivered</option>
-      <option value="cancelled">Cancelled</option>
     </select>
+    <button id="refreshOrders" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+      </svg>
+    </button>
   </div>
+  
   <!-- Stats -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <div style="background-color: #1a1a1f; padding: 1.5rem; border-radius: 0.5rem;">
       <div class="text-gray-400 text-sm mb-1">TOTAL</div>
-      <div class="text-white text-2xl font-bold">{{ total_orders }}</div>
+      <div class="text-white text-2xl font-bold" id="totalOrders">0</div>
     </div>
     <div style="background-color: #1a1a1f; padding: 1.5rem; border-radius: 0.5rem;">
       <div class="text-gray-400 text-sm mb-1">PENDING</div>
-      <div class="text-white text-2xl font-bold">{{ pending_orders }}</div>
+      <div class="text-white text-2xl font-bold" id="pendingOrders">0</div>
     </div>
     <div style="background-color: #1a1a1f; padding: 1.5rem; border-radius: 0.5rem;">
-      <div class="text-gray-400 text-sm mb-1">IN TRANSIT</div>
-      <div class="text-white text-2xl font-bold">{{ transit_orders }}</div>
+      <div class="text-gray-400 text-sm mb-1">COMPLETED</div>
+      <div class="text-white text-2xl font-bold" id="completedOrders">0</div>
     </div>
     <div style="background-color: #1a1a1f; padding: 1.5rem; border-radius: 0.5rem;">
-      <div class="text-gray-400 text-sm mb-1">DELIVERED</div>
-      <div class="text-white text-2xl font-bold">{{ delivered_orders }}</div>
+      <div class="text-gray-400 text-sm mb-1">REVENUE</div>
+      <div class="text-white text-2xl font-bold" id="totalRevenue">₹0</div>
     </div>
   </div>
+  
   <!-- Orders Table (Desktop & Tablet) -->
   <div class="hidden md:block overflow-x-auto" style="background-color: #1a1a1f; border-radius: 0.5rem;">
     <table class="w-full">
@@ -46,84 +51,40 @@
         <tr class="border-b border-gray-700">
           <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Order ID</th>
           <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Customer</th>
+          <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Items</th>
           <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Amount</th>
           <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Status</th>
-          <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Payment</th>
-          <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Delivery</th>
           <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Date</th>
           <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Actions</th>
         </tr>
       </thead>
-      <tbody>
-        {% for order in orders %}
-        <tr class="order-row {% if not forloop.last %}border-b border-gray-700{% endif %}" data-order-id="{{ order.order_id|lower }}" data-customer="{{ order.customer_name|lower }}" data-status="{{ order.status }}">
-          <td class="px-6 py-4 text-white font-medium">{{ order.order_id }}</td>
-          <td class="px-6 py-4 text-gray-300">{{ order.customer_name }}</td>
-          <td class="px-6 py-4 text-white">${{ order.total_amount }}</td>
-          <td class="px-6 py-4">
-            <span class="px-3 py-1 rounded-full text-xs font-medium {% if order.status == 'delivered' %}bg-green-500/20 text-green-400{% elif order.status == 'shipped' %}bg-purple-500/20 text-purple-400{% elif order.status == 'out' %}bg-blue-500/20 text-blue-400{% elif order.status == 'packed' %}bg-purple-500/20 text-purple-400{% else %}bg-yellow-500/20 text-yellow-400{% endif %}">{{ order.get_status_display }}</span>
-          </td>
-          <td class="px-6 py-4 {% if order.is_paid %}text-green-400{% else %}text-red-400{% endif %}">{% if order.is_paid %}Paid{% else %}Unpaid{% endif %}</td>
-          <td class="px-6 py-4 {% if order.delivery_person %}text-gray-300{% else %}text-gray-500{% endif %}">{{ order.delivery_person|default:"N/A" }}</td>
-          <td class="px-6 py-4 text-gray-400">{{ order.created_at|date:"n/j/y" }}</td>
-          <td class="px-6 py-4">
-            <div class="flex gap-2">
-              <button class="p-1 hover:bg-gray-700 rounded">
-                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                </svg>
-              </button>
-              <button class="p-1 hover:bg-gray-700 rounded">
-                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                </svg>
-              </button>
-            </div>
-          </td>
-        </tr>
-        {% endfor %}
+      <tbody id="ordersTableBody">
+        <!-- Orders will be loaded here -->
       </tbody>
     </table>
   </div>
+  
   <!-- Orders Cards (Mobile) -->
-  <div class="md:hidden space-y-4">
-    {% for order in orders %}
-    <div class="order-card" style="background-color: #1a1a1f; padding: 1.25rem; border-radius: 0.5rem;" data-order-id="{{ order.order_id|lower }}" data-customer="{{ order.customer_name|lower }}" data-status="{{ order.status }}">
-      <div class="flex justify-between items-start mb-3">
-        <div>
-          <div class="text-white font-bold text-lg">{{ order.order_id }}</div>
-          <div class="text-gray-300 text-sm">{{ order.customer_name }}</div>
-        </div>
-        <span class="px-3 py-1 rounded-full text-xs font-medium {% if order.status == 'delivered' %}bg-green-500/20 text-green-400{% elif order.status == 'shipped' %}bg-purple-500/20 text-purple-400{% elif order.status == 'out' %}bg-blue-500/20 text-blue-400{% elif order.status == 'packed' %}bg-purple-500/20 text-purple-400{% else %}bg-yellow-500/20 text-yellow-400{% endif %}">{{ order.get_status_display }}</span>
-      </div>
-      <div class="space-y-2 text-sm">
-        <div class="flex justify-between">
-          <span class="text-gray-400">Amount:</span>
-          <span class="text-white font-medium">${{ order.total_amount }}</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-gray-400">Payment:</span>
-          <span class="{% if order.is_paid %}text-green-400{% else %}text-red-400{% endif %}">{% if order.is_paid %}Paid{% else %}Unpaid{% endif %}</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-gray-400">Delivery:</span>
-          <span class="{% if order.delivery_person %}text-gray-300{% else %}text-gray-500{% endif %}">{{ order.delivery_person|default:"N/A" }}</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-gray-400">Date:</span>
-          <span class="text-gray-400">{{ order.created_at|date:"n/j/y" }}</span>
-        </div>
-      </div>
-      <div class="flex gap-2 mt-4">
-        <button class="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm">View</button>
-        <button class="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm">Edit</button>
-      </div>
-    </div>
-    {% endfor %}
+  <div class="md:hidden space-y-4" id="ordersCardContainer">
+    <!-- Order cards will be loaded here -->
   </div>
+  
+  <!-- Pagination -->
+  <div class="mt-6" id="ordersPagination">
+    <!-- Pagination will be loaded here -->
+  </div>
+  
   <div id="noOrderResults" class="hidden text-center py-12">
-    <p class="text-gray-400 text-lg">No orders match your search.</p>
+    <p class="text-gray-400 text-lg">No orders found.</p>
   </div>
 </div>
+
+<!-- Order Detail Modal -->
+<div id="orderModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div id="orderModalContent">
+    <!-- Modal content will be loaded here -->
+  </div>
+</div>
+
+<script src="{% static 'js/order-management.js' %}"></script>
 {% endblock %}

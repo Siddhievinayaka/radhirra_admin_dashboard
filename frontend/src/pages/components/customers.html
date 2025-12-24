@@ -1,0 +1,123 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2">CUSTOMER MANAGEMENT</h1>
+    <p class="text-gray-400">Manage customers and their order history</p>
+  </div>
+
+  <!-- Search and Filter -->
+  <div class="mb-6 flex flex-col sm:flex-row gap-4" style="background-color: #1a1a1f; padding: 1.5rem; border-radius: 0.5rem;">
+    <input type="text" id="customerSearch" placeholder="Search by name, email, or username..." 
+           class="flex-1 px-4 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500" />
+    <select id="statusFilter" class="px-4 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+      <option value="">All Customers</option>
+      <option value="active">Active</option>
+      <option value="inactive">Inactive</option>
+    </select>
+    <button id="refreshCustomers" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div style="background-color: #1a1a1f; padding: 1.5rem; border-radius: 0.5rem;">
+      <div class="text-gray-400 text-sm mb-1">TOTAL CUSTOMERS</div>
+      <div class="text-white text-2xl font-bold" id="totalCustomers">0</div>
+    </div>
+    <div style="background-color: #1a1a1f; padding: 1.5rem; border-radius: 0.5rem;">
+      <div class="text-gray-400 text-sm mb-1">ACTIVE</div>
+      <div class="text-green-500 text-2xl font-bold" id="activeCustomers">0</div>
+    </div>
+    <div style="background-color: #1a1a1f; padding: 1.5rem; border-radius: 0.5rem;">
+      <div class="text-gray-400 text-sm mb-1">NEW THIS MONTH</div>
+      <div class="text-blue-500 text-2xl font-bold" id="newCustomers">0</div>
+    </div>
+    <div style="background-color: #1a1a1f; padding: 1.5rem; border-radius: 0.5rem;">
+      <div class="text-gray-400 text-sm mb-1">TOTAL ORDERS</div>
+      <div class="text-purple-500 text-2xl font-bold" id="customerOrders">0</div>
+    </div>
+  </div>
+
+  <!-- Customer Table (Desktop) -->
+  <div class="hidden md:block overflow-x-auto" style="background-color: #1a1a1f; border-radius: 0.5rem;">
+    <table class="w-full">
+      <thead>
+        <tr class="border-b border-gray-700">
+          <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Customer</th>
+          <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Email</th>
+          <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Orders</th>
+          <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Total Spent</th>
+          <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Status</th>
+          <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Joined</th>
+          <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="customersTableBody">
+        <!-- Customers will be loaded here -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Customer Cards (Mobile) -->
+  <div class="md:hidden space-y-4" id="customersCardContainer">
+    <!-- Customer cards will be loaded here -->
+  </div>
+
+  <!-- Pagination -->
+  <div class="mt-6" id="customersPagination">
+    <!-- Pagination will be loaded here -->
+  </div>
+
+  <div id="noCustomerResults" class="hidden text-center py-12">
+    <p class="text-gray-400 text-lg">No customers found.</p>
+  </div>
+</div>
+
+<!-- Customer Profile Modal -->
+<div id="customerModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div id="customerModalContent">
+    <!-- Modal content will be loaded here -->
+  </div>
+</div>
+
+<!-- Review Management Section -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+  <div class="mb-8">
+    <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2">REVIEW MANAGEMENT</h1>
+    <p class="text-gray-400">Moderate and manage product reviews</p>
+  </div>
+
+  <!-- Review Stats -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div style="background-color: #1a1a1f; padding: 1.5rem; border-radius: 0.5rem;">
+      <div class="text-gray-400 text-sm mb-1">TOTAL REVIEWS</div>
+      <div class="text-white text-2xl font-bold" id="totalReviews">0</div>
+    </div>
+    <div style="background-color: #1a1a1f; padding: 1.5rem; border-radius: 0.5rem;">
+      <div class="text-gray-400 text-sm mb-1">AVERAGE RATING</div>
+      <div class="text-yellow-500 text-2xl font-bold" id="avgRating">0.0</div>
+    </div>
+    <div style="background-color: #1a1a1f; padding: 1.5rem; border-radius: 0.5rem;">
+      <div class="text-gray-400 text-sm mb-1">5 STAR REVIEWS</div>
+      <div class="text-green-500 text-2xl font-bold" id="fiveStarReviews">0</div>
+    </div>
+    <div style="background-color: #1a1a1f; padding: 1.5rem; border-radius: 0.5rem;">
+      <div class="text-gray-400 text-sm mb-1">RECENT REVIEWS</div>
+      <div class="text-blue-500 text-2xl font-bold" id="recentReviews">0</div>
+    </div>
+  </div>
+
+  <!-- Reviews List -->
+  <div id="reviewsList" style="background-color: #1a1a1f; border-radius: 0.5rem; padding: 1.5rem;">
+    <!-- Reviews will be loaded here -->
+  </div>
+</div>
+
+<script src="{% static 'js/customer-management.js' %}"></script>
+{% endblock %}

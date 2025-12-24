@@ -1,4 +1,5 @@
 {%extends 'index.html' %}
+{% load static %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
@@ -20,7 +21,7 @@
                 <span class="text-green-500 text-sm font-semibold"> +12%</span>
             </div>
             <div class="text-gray-400 text-xs sm:text-sm mb-1">TOTAL CUSTOMERS</div>
-            <div class="text-white text-2xl sm:text-3xl font-bold">10</div>
+            <div class="text-white text-2xl sm:text-3xl font-bold" id="totalCustomers">0</div>
         </div>
         <!-- Total Orders -->
         <div class="bg-[#1a1a1f] rounded-xl p-4 sm:p-6 border border-gray-800">
@@ -34,7 +35,7 @@
                 <span class="text-green-500 text-sm font-semibold"> +8%</span>
             </div>
             <div class="text-gray-400 text-xs sm:text-sm mb-1">TOTAL ORDERS</div>
-            <div class="text-white text-2xl sm:text-3xl font-bold">20</div>
+            <div class="text-white text-2xl sm:text-3xl font-bold" id="totalOrders">0</div>
         </div>
         <!-- Total Revenue -->
         <div class="bg-[#1a1a1f] rounded-xl p-4 sm:p-6 border border-gray-800">
@@ -48,7 +49,7 @@
                 <span class="text-green-500 text-sm font-semibold"> +15%</span>
             </div>
             <div class="text-gray-400 text-xs sm:text-sm mb-1">TOTAL REVENUE</div>
-            <div class="text-white text-2xl sm:text-3xl font-bold">$2,717.24</div>
+            <div class="text-white text-2xl sm:text-3xl font-bold" id="totalRevenue">₹0.00</div>
         </div>
         <!-- Total Products -->
         <div class="bg-[#1a1a1f] rounded-xl p-4 sm:p-6 border border-gray-800">
@@ -62,30 +63,30 @@
                 <span class="text-green-500 text-sm font-semibold"> +3%</span>
             </div>
             <div class="text-gray-400 text-xs sm:text-sm mb-1">TOTAL PRODUCTS</div>
-            <div class="text-white text-2xl sm:text-3xl font-bold">{{ total_products }}</div>
+            <div class="text-white text-2xl sm:text-3xl font-bold" id="totalProducts">0</div>
         </div>
     </div>
     <!-- Secondary Metrics -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
         <div class="bg-[#1a1a1f] rounded-xl p-4 sm:p-5 border border-gray-800">
             <div class="text-gray-400 text-xs sm:text-sm mb-2">Today's Orders</div>
-            <div class="text-white text-xl sm:text-2xl font-bold">0</div>
+            <div class="text-white text-xl sm:text-2xl font-bold" data-metric="today-orders">0</div>
         </div>
         <div class="bg-[#1a1a1f] rounded-xl p-4 sm:p-5 border border-gray-800">
             <div class="text-gray-400 text-xs sm:text-sm mb-2">Today's Revenue</div>
-            <div class="text-white text-xl sm:text-2xl font-bold">$0</div>
+            <div class="text-white text-xl sm:text-2xl font-bold" data-metric="today-revenue">₹0</div>
         </div>
         <div class="bg-[#1a1a1f] rounded-xl p-4 sm:p-5 border border-yellow-500 border-opacity-30">
             <div class="text-gray-400 text-xs sm:text-sm mb-2">Pending Orders</div>
-            <div class="text-yellow-500 text-xl sm:text-2xl font-bold">2</div>
+            <div class="text-yellow-500 text-xl sm:text-2xl font-bold" data-metric="pending">0</div>
         </div>
         <div class="bg-[#1a1a1f] rounded-xl p-4 sm:p-5 border border-red-500 border-opacity-30">
             <div class="text-gray-400 text-xs sm:text-sm mb-2">Low Stock Alerts</div>
-            <div class="text-red-500 text-xl sm:text-2xl font-bold">2</div>
+            <div class="text-red-500 text-xl sm:text-2xl font-bold" data-metric="low-stock">0</div>
         </div>
     </div>
     <!-- Charts Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-8">
         <!-- Sales Trend -->
         <div class="bg-[#1a1a1f] rounded-xl p-4 sm:p-6 border border-gray-800">
             <h3 class="text-white text-base sm:text-lg font-semibold mb-4">Sales Trend (7 Days)</h3>
@@ -116,54 +117,94 @@
                     <div class="flex items-center gap-2 sm:gap-3">
                         <div class="w-8 h-8 sm:w-10 sm:h-10 bg-[#b48cf2] bg-opacity-10 rounded-lg"></div>
                         <div>
-                            <div class="text-white text-xs sm:text-sm font-medium">Product A</div>
-                            <div class="text-gray-500 text-xs">120 sold</div>
+                            <div class="text-white text-xs sm:text-sm font-medium">Loading...</div>
+                            <div class="text-gray-500 text-xs">Fetching data</div>
                         </div>
                     </div>
-                    <div class="text-green-500 text-xs sm:text-sm font-semibold">$1,200</div>
+                    <div class="text-green-500 text-xs sm:text-sm font-semibold">₹0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Revenue Analytics -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        <!-- Revenue Breakdown -->
+        <div class="bg-[#1a1a1f] rounded-xl p-4 sm:p-6 border border-gray-800">
+            <h3 class="text-white text-base sm:text-lg font-semibold mb-4">Revenue Breakdown</h3>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <span class="text-gray-300 text-sm">Completed Orders</span>
+                    </div>
+                    <span class="text-white font-medium" id="completedRevenue">₹0</span>
                 </div>
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2 sm:gap-3">
-                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-[#b48cf2] bg-opacity-10 rounded-lg"></div>
-                        <div>
-                            <div class="text-white text-xs sm:text-sm font-medium">Product B</div>
-                            <div class="text-gray-500 text-xs">95 sold</div>
-                        </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                        <span class="text-gray-300 text-sm">Pending Orders</span>
                     </div>
-                    <div class="text-green-500 text-xs sm:text-sm font-semibold">$950</div>
+                    <span class="text-white font-medium" id="pendingRevenue">₹0</span>
                 </div>
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2 sm:gap-3">
-                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-[#b48cf2] bg-opacity-10 rounded-lg"></div>
-                        <div>
-                            <div class="text-white text-xs sm:text-sm font-medium">Product C</div>
-                            <div class="text-gray-500 text-xs">78 sold</div>
-                        </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        <span class="text-gray-300 text-sm">Average Order</span>
                     </div>
-                    <div class="text-green-500 text-xs sm:text-sm font-semibold">$780</div>
+                    <span class="text-white font-medium" id="averageOrder">₹0</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Order Status Distribution -->
+        <div class="bg-[#1a1a1f] rounded-xl p-4 sm:p-6 border border-gray-800">
+            <h3 class="text-white text-base sm:text-lg font-semibold mb-4">Order Status</h3>
+            <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-300 text-sm">Completed</span>
+                    <div class="flex items-center gap-2">
+                        <div class="w-16 h-2 bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-green-500 rounded-full" id="completedBar" style="width: 0%"></div>
+                        </div>
+                        <span class="text-white text-sm font-medium" id="completedPercent">0%</span>
+                    </div>
                 </div>
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2 sm:gap-3">
-                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-[#b48cf2] bg-opacity-10 rounded-lg"></div>
-                        <div>
-                            <div class="text-white text-xs sm:text-sm font-medium">Product D</div>
-                            <div class="text-gray-500 text-xs">62 sold</div>
+                    <span class="text-gray-300 text-sm">Pending</span>
+                    <div class="flex items-center gap-2">
+                        <div class="w-16 h-2 bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-yellow-500 rounded-full" id="pendingBar" style="width: 0%"></div>
                         </div>
+                        <span class="text-white text-sm font-medium" id="pendingPercent">0%</span>
                     </div>
-                    <div class="text-green-500 text-xs sm:text-sm font-semibold">$620</div>
                 </div>
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2 sm:gap-3">
-                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-[#b48cf2] bg-opacity-10 rounded-lg"></div>
-                        <div>
-                            <div class="text-white text-xs sm:text-sm font-medium">Product E</div>
-                            <div class="text-gray-500 text-xs">45 sold</div>
-                        </div>
-                    </div>
-                    <div class="text-green-500 text-xs sm:text-sm font-semibold">$450</div>
+            </div>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="bg-[#1a1a1f] rounded-xl p-4 sm:p-6 border border-gray-800">
+            <h3 class="text-white text-base sm:text-lg font-semibold mb-4">Quick Stats</h3>
+            <div class="space-y-3">
+                <div class="flex justify-between">
+                    <span class="text-gray-400 text-sm">Categories</span>
+                    <span class="text-white font-medium" id="totalCategories">15</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400 text-sm">Reviews</span>
+                    <span class="text-white font-medium" id="totalReviews">2</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400 text-sm">Avg Rating</span>
+                    <span class="text-white font-medium" id="avgRating">4.5★</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400 text-sm">Product Images</span>
+                    <span class="text-white font-medium" id="totalImages">6</span>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<script src="{% static 'js/dashboard-manager.js' %}"></script>
 {%endblock%}

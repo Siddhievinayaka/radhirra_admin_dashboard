@@ -7,14 +7,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         orders = [
-            {'order_id': 'ORD-1000', 'customer_name': 'John Doe', 'total_amount': Decimal('150.25'), 'status': 'delivered', 'is_paid': True, 'delivery_person': 'Charlie'},
-            {'order_id': 'ORD-1001', 'customer_name': 'John Doe', 'total_amount': Decimal('135.50'), 'status': 'shipped', 'is_paid': True, 'delivery_person': 'Diana'},
-            {'order_id': 'ORD-1002', 'customer_name': 'Jane Smith', 'total_amount': Decimal('200.00'), 'status': 'delivered', 'is_paid': True, 'delivery_person': 'Charlie'},
-            {'order_id': 'ORD-1003', 'customer_name': 'Jane Smith', 'total_amount': Decimal('180.25'), 'status': 'out', 'is_paid': True, 'delivery_person': 'Diana'},
-            {'order_id': 'ORD-1004', 'customer_name': 'Jane Smith', 'total_amount': Decimal('130.00'), 'status': 'packed', 'is_paid': False, 'delivery_person': ''},
+            {'transaction_id': 'ORD-1000', 'complete': True},
+            {'transaction_id': 'ORD-1001', 'complete': True},
+            {'transaction_id': 'ORD-1002', 'complete': True},
+            {'transaction_id': 'ORD-1003', 'complete': False},
+            {'transaction_id': 'ORD-1004', 'complete': False},
         ]
         
         for order_data in orders:
-            Order.objects.get_or_create(order_id=order_data['order_id'], defaults=order_data)
+            Order.objects.get_or_create(transaction_id=order_data['transaction_id'], defaults=order_data)
         
         self.stdout.write(self.style.SUCCESS('Successfully added 5 dummy orders'))

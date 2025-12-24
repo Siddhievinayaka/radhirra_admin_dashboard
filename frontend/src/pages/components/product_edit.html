@@ -60,14 +60,58 @@
       </div>
       <div>
         <h2 class="text-lg font-semibold text-white mb-4">Classification</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label class="block text-sm text-gray-400 mb-2">Category</label>
-            <input type="text" id="editProductCategory" class="w-full bg-[#0f0f14] border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors" placeholder="Enter category" />
+            <select id="editProductCategory" class="w-full bg-[#0f0f14] border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors">
+              <option value="">Select Category</option>
+            </select>
           </div>
+          <div>
+            <label class="block text-sm text-gray-400 mb-2">Size</label>
+            <select id="editProductSize" class="w-full bg-[#0f0f14] border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors">
+              <option value="">Select Size</option>
+              <option value="XS">XS</option>
+              <option value="S">S</option>
+              <option value="M">M</option>
+              <option value="L">L</option>
+              <option value="XL">XL</option>
+              <option value="XXL">XXL</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm text-gray-400 mb-2">Sleeve</label>
+            <select id="editProductSleeve" class="w-full bg-[#0f0f14] border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors">
+              <option value="">Select Sleeve</option>
+              <option value="sleeveless">Sleeveless</option>
+              <option value="short">Short</option>
+              <option value="3/4">3/4</option>
+              <option value="full">Full</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
           <div>
             <label class="block text-sm text-gray-400 mb-2">Material</label>
             <input type="text" id="editProductMaterial" class="w-full bg-[#0f0f14] border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors" placeholder="Enter material" />
+          </div>
+        </div>
+      </div>
+      
+      <div>
+        <h2 class="text-lg font-semibold text-white mb-4">Product Flags</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="flex items-center">
+            <input type="checkbox" id="editIsFeatured" class="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500">
+            <label for="editIsFeatured" class="ml-2 text-sm text-gray-300">Featured Product</label>
+          </div>
+          <div class="flex items-center">
+            <input type="checkbox" id="editIsNewArrival" class="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500">
+            <label for="editIsNewArrival" class="ml-2 text-sm text-gray-300">New Arrival</label>
+          </div>
+          <div class="flex items-center">
+            <input type="checkbox" id="editIsBestSeller" class="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500">
+            <label for="editIsBestSeller" class="ml-2 text-sm text-gray-300">Best Seller</label>
           </div>
         </div>
       </div>
