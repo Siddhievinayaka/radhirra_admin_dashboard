@@ -78,7 +78,7 @@ CLOUDINARY_API_SECRET=KNWUBus3MXZo5DWaOL5bcjczep0
 - main_img (one img selection)
 - sub_images (allow admin to upload many images at once)
 
-#### (This Table can be Avoid if you think so not needed) Table: `Radhirra_productimage`
+#### Table: `Radhirra_productimage`
 - id (Primary Key)
 - product_id (Foreign Key → Radhirra_product)
 - images  (Cloudinary URL) 

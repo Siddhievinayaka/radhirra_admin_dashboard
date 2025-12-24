@@ -3,3 +3,14 @@ __pycache__/
 .venv/
 node_modules/
 .env
+ADMIN_DASHBOARD_REQUIREMENTS.md
+ADMIN_FOCUSED_PLAN.md
+CLOUDINARY_INTEGRATION.md
+CURRENT_STATUS.md
+IMAGE_UPLOAD_GUIDE.md
+IMPLEMENTATION.md
+IMPLEMENTATION_PLAN.md
+REVISED_IMPLEMENTATION_PLAN.md
+add_status_field.py
+add_status_column.py
+fix_migrations.py
