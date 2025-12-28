@@ -344,47 +344,51 @@ class OrderManagement {
         if (!modal || !modalContent) return;
 
         modalContent.innerHTML = `
-            <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-y-auto">
-                <div class="px-6 py-4 border-b border-gray-200">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-6xl mx-auto max-h-screen overflow-y-auto">
+                <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
                     <div class="flex justify-between items-center">
-                        <h3 class="text-lg font-medium text-gray-900">Order #${order.id}</h3>
+                        <h3 class="text-lg sm:text-xl font-medium text-gray-900">Order #${order.id}</h3>
                         <button onclick="orderManagement.closeModal()" class="text-gray-400 hover:text-gray-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                         </button>
                     </div>
                 </div>
                 
-                <div class="px-6 py-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="px-4 sm:px-6 py-4">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                         <div>
-                            <h4 class="font-medium text-gray-900 mb-2">Customer Information</h4>
-                            <p style="color: black"><strong>Name:</strong> ${order.customer_name || 'Guest'}</p>
-                            <p style="color: black"><strong>Email:</strong> ${order.customer_email || 'N/A'}</p>
-                            <p style="color: black"><strong>Order Date:</strong> ${new Date(order.date_ordered).toLocaleString()}</p>
+                            <h4 class="font-medium text-gray-900 mb-2 text-sm sm:text-base">Customer Information</h4>
+                            <div class="space-y-1 text-xs sm:text-sm">
+                                <p style="color: black"><strong>Name:</strong> ${order.customer_name || 'Guest'}</p>
+                                <p style="color: black"><strong>Email:</strong> ${order.customer_email || 'N/A'}</p>
+                                <p style="color: black"><strong>Order Date:</strong> ${new Date(order.date_ordered).toLocaleString()}</p>
+                            </div>
                         </div>
                         
                         <div>
-                            <h4 class="font-medium text-gray-900 mb-2">Order Summary</h4>
-                            <p style="color: black"><strong>Status:</strong> 
-                                <span class="px-2 py-1 text-xs rounded-full ${(order.order_status || 'pending') === 'completed' ? 'bg-green-100 text-green-800' : (order.order_status || 'pending') === 'confirmed' ? 'bg-blue-100 text-blue-800' : (order.order_status || 'pending') === 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">
-                                    ${(order.order_status || 'pending').charAt(0).toUpperCase() + (order.order_status || 'pending').slice(1)}
-                                </span>
-                            </p>
-                            <p style="color: black"><strong>Order Type:</strong> ${(order.order_type || 'N/A').charAt(0).toUpperCase() + (order.order_type || 'N/A').slice(1)}</p>
-                            <p style="color: black"><strong>Contact:</strong> ${order.contact_value || 'N/A'}</p>
-                            <p style="color: black"><strong>Total Items:</strong> ${order.get_cart_items || 0}</p>
-                            <p style="color: black"><strong>Total Amount:</strong> ₹${parseFloat(order.total_amount || order.get_cart_total || 0).toFixed(2)}</p>
-                            <p style="color: black"><strong>Transaction ID:</strong> ${order.transaction_id || 'N/A'}</p>
+                            <h4 class="font-medium text-gray-900 mb-2 text-sm sm:text-base">Order Summary</h4>
+                            <div class="space-y-1 text-xs sm:text-sm">
+                                <p style="color: black"><strong>Status:</strong> 
+                                    <span class="px-2 py-1 text-xs rounded-full ${(order.order_status || 'pending') === 'completed' ? 'bg-green-100 text-green-800' : (order.order_status || 'pending') === 'confirmed' ? 'bg-blue-100 text-blue-800' : (order.order_status || 'pending') === 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">
+                                        ${(order.order_status || 'pending').charAt(0).toUpperCase() + (order.order_status || 'pending').slice(1)}
+                                    </span>
+                                </p>
+                                <p style="color: black"><strong>Order Type:</strong> ${(order.order_type || 'N/A').charAt(0).toUpperCase() + (order.order_type || 'N/A').slice(1)}</p>
+                                <p style="color: black"><strong>Contact:</strong> ${order.contact_value || 'N/A'}</p>
+                                <p style="color: black"><strong>Total Items:</strong> ${order.get_cart_items || 0}</p>
+                                <p style="color: black"><strong>Total Amount:</strong> ₹${parseFloat(order.total_amount || order.get_cart_total || 0).toFixed(2)}</p>
+                                <p style="color: black"><strong>Transaction ID:</strong> ${order.transaction_id || 'N/A'}</p>
+                            </div>
                         </div>
                     </div>
                     
                     ${order.shipping_address && order.shipping_address.length > 0 ? `
-                        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="mt-4 sm:mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                             <div>
-                                <h4 class="font-medium text-gray-900 mb-2">Shipping Address</h4>
-                                <div class="bg-gray-50 p-3 rounded">
+                                <h4 class="font-medium text-gray-900 mb-2 text-sm sm:text-base">Shipping Address</h4>
+                                <div class="bg-gray-50 p-3 rounded text-xs sm:text-sm">
                                     ${order.shipping_address.map(addr => `
                                         <p style="color: black">${addr.address}</p>
                                         <p style="color: black">${addr.city}, ${addr.state} ${addr.zipcode}</p>
@@ -392,11 +396,11 @@ class OrderManagement {
                                 </div>
                             </div>
                             <div>
-                                <h4 class="font-medium text-gray-900 mb-2">User Notes</h4>
-                                <div class="bg-gray-50 p-3 rounded">
+                                <h4 class="font-medium text-gray-900 mb-2 text-sm sm:text-base">User Notes</h4>
+                                <div class="bg-gray-50 p-3 rounded text-xs sm:text-sm">
                                     ${(order.items || []).filter(item => item.user_note && item.user_note.trim()).length > 0 ? 
                                         (order.items || []).filter(item => item.user_note && item.user_note.trim()).map(item => `
-                                            <p style="color: black"> ${item.user_note}</p>
+                                            <p style="color: black"><strong>${item.product_name}:</strong> ${item.user_note}</p>
                                         `).join('') : 
                                         '<p class="text-gray-500">No user notes</p>'
                                     }
@@ -404,12 +408,12 @@ class OrderManagement {
                             </div>
                         </div>
                     ` : `
-                        <div class="mt-6">
-                            <h4 class="font-medium text-gray-900 mb-2">User Notes</h4>
-                            <div class="bg-gray-50 p-3 rounded">
+                        <div class="mt-4 sm:mt-6">
+                            <h4 class="font-medium text-gray-900 mb-2 text-sm sm:text-base">User Notes</h4>
+                            <div class="bg-gray-50 p-3 rounded text-xs sm:text-sm">
                                 ${(order.items || []).filter(item => item.user_note && item.user_note.trim()).length > 0 ? 
                                     (order.items || []).filter(item => item.user_note && item.user_note.trim()).map(item => `
-                                        <p style="color: black"> ${item.user_note}</p>
+                                        <p style="color: black"><strong>${item.product_name}:</strong> ${item.user_note}</p>
                                     `).join('') : 
                                     '<p class="text-gray-500">No user notes</p>'
                                 }
@@ -417,25 +421,25 @@ class OrderManagement {
                         </div>
                     `}
                     
-                    <div class="mt-6">
-                        <h4 class="font-medium text-gray-900 mb-2">Order Items</h4>
+                    <div class="mt-4 sm:mt-6">
+                        <h4 class="font-medium text-gray-900 mb-2 text-sm sm:text-base">Order Items</h4>
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                                        <th class="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                                        <th class="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
+                                        <th class="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                                        <th class="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     ${(order.items || []).map(item => `
                                         <tr>
-                                            <td class="px-4 py-2 text-sm text-gray-900">${item.product_name || 'N/A'}</td>
-                                            <td class="px-4 py-2 text-sm text-gray-500">${item.quantity || 0}</td>
-                                            <td class="px-4 py-2 text-sm text-gray-500">₹${parseFloat(item.price_at_order || item.product_price || 0).toFixed(2)}</td>
-                                            <td class="px-4 py-2 text-sm text-gray-900">₹${parseFloat(item.get_total || 0).toFixed(2)}</td>
+                                            <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-900">${item.product_name || 'N/A'}</td>
+                                            <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-500">${item.quantity || 0}</td>
+                                            <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-500">₹${parseFloat(item.price_at_order || item.product_price || 0).toFixed(2)}</td>
+                                            <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-900">₹${parseFloat(item.get_total || 0).toFixed(2)}</td>
                                         </tr>
                                     `).join('')}
                                 </tbody>
@@ -444,23 +448,24 @@ class OrderManagement {
                     </div>
                 </div>
                 
-                <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
-                    <button onclick="orderManagement.closeModal()" 
-                            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-                        Close
-                    </button>
-                    <button onclick="orderManagement.generateInvoice(${order.id})" 
-                            class="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700">
-                        Generate Invoice
-                    </button>
-                    <button onclick="orderManagement.viewCustomerHistory(${order.user || 0})" 
-                            class="px-4 py-2 bg-purple-600 text-white rounded-md text-sm font-medium hover:bg-purple-700">
-                        Customer History
-                    </button>
-                    <button onclick="orderManagement.updateOrderStatus(${order.id}, ${!order.complete})" 
-                            class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
-                        ${order.complete ? 'Mark as Pending' : 'Mark as Complete'}
-                    </button>
+                <div class="px-4 sm:px-6 py-4 border-t border-gray-200">
+                    <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+                        <button onclick="orderManagement.closeModal()" 
+                                class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            Close
+                        </button>
+                        <button onclick="orderManagement.generateInvoice(${order.id})" 
+                                class="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700">
+                            Generate Invoice
+                        </button>
+                        <button onclick="orderManagement.viewCustomerHistory(${order.user || 0})" 
+                                class="w-full sm:w-auto px-4 py-2 bg-purple-600 text-white rounded-md text-sm font-medium hover:bg-purple-700 flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            <span class="hidden sm:inline">Customer History</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
@@ -782,45 +787,81 @@ class OrderManagement {
         if (!modal || !modalContent) return;
 
         modalContent.innerHTML = `
-            <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-y-auto">
-                <div class="px-6 py-4 border-b border-gray-200">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-6xl mx-auto max-h-screen overflow-y-auto">
+                <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
                     <div class="flex justify-between items-center">
-                        <h3 class="text-lg font-medium text-gray-900">Customer Order History</h3>
+                        <h3 class="text-lg sm:text-xl font-medium text-gray-900">Customer Order History</h3>
                         <button onclick="orderManagement.closeModal()" class="text-gray-400 hover:text-gray-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                         </button>
                     </div>
                 </div>
                 
-                <div class="px-6 py-4">
+                <div class="px-4 sm:px-6 py-4">
                     <div class="mb-4">
-                        <h4 class="font-medium text-gray-900 mb-2">Customer Summary</h4>
-                        <p><strong>Total Orders:</strong> ${orders.length}</p>
-                        <p><strong>Total Spent:</strong> ₹${orders.reduce((sum, order) => sum + parseFloat(order.get_cart_total), 0).toFixed(2)}</p>
+                        <h4 class="font-medium text-gray-900 mb-2 text-sm sm:text-base">Customer Summary</h4>
+                        <div class="grid grid-cols-2 gap-4 text-xs sm:text-sm">
+                            <p><strong>Total Orders:</strong> ${orders.length}</p>
+                            <p><strong>Total Spent:</strong> ₹${orders.reduce((sum, order) => sum + parseFloat(order.get_cart_total), 0).toFixed(2)}</p>
+                        </div>
                     </div>
                     
-                    <div class="overflow-x-auto">
+                    <!-- Mobile Card View -->
+                    <div class="block sm:hidden space-y-4">
+                        ${orders.map(order => `
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="font-medium text-gray-900">#${order.id}</div>
+                                    <span class="px-2 py-1 text-xs rounded-full ${
+                                        (order.order_status || 'pending') === 'completed' ? 'bg-green-100 text-green-800' : 
+                                        (order.order_status || 'pending') === 'confirmed' ? 'bg-blue-100 text-blue-800' : 
+                                        (order.order_status || 'pending') === 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
+                                    }">
+                                        ${(order.order_status || 'pending').charAt(0).toUpperCase() + (order.order_status || 'pending').slice(1)}
+                                    </span>
+                                </div>
+                                <div class="text-sm text-gray-600 space-y-1">
+                                    <div>Date: ${new Date(order.date_ordered).toLocaleDateString()}</div>
+                                    <div>Items: ${order.get_cart_items}</div>
+                                    <div>Amount: ₹${parseFloat(order.get_cart_total).toFixed(2)}</div>
+                                </div>
+                                <div class="flex gap-2 mt-3">
+                                    <button onclick="orderManagement.viewOrder(${order.id})" 
+                                            class="flex-1 px-3 py-2 bg-purple-600 text-white rounded text-xs">
+                                        View
+                                    </button>
+                                    <button onclick="orderManagement.generateInvoice(${order.id})" 
+                                            class="flex-1 px-3 py-2 bg-green-600 text-white rounded text-xs">
+                                        Invoice
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <!-- Desktop Table View -->
+                    <div class="hidden sm:block overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Order #</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Items</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                    <th class="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Order #</th>
+                                    <th class="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                                    <th class="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Items</th>
+                                    <th class="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                                    <th class="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                    <th class="px-2 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 ${orders.map(order => `
                                     <tr>
-                                        <td class="px-4 py-2 text-sm text-gray-900">#${order.id}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-500">${new Date(order.date_ordered).toLocaleDateString()}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-500">${order.get_cart_items}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">₹${parseFloat(order.get_cart_total).toFixed(2)}</td>
-                                        <td class="px-4 py-2 text-sm">
+                                        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-900">#${order.id}</td>
+                                        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-500">${new Date(order.date_ordered).toLocaleDateString()}</td>
+                                        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-500">${order.get_cart_items}</td>
+                                        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-900">₹${parseFloat(order.get_cart_total).toFixed(2)}</td>
+                                        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">
                                             <span class="px-2 py-1 text-xs rounded-full ${
                                                 (order.order_status || 'pending') === 'completed' ? 'bg-green-100 text-green-800' : 
                                                 (order.order_status || 'pending') === 'confirmed' ? 'bg-blue-100 text-blue-800' : 
@@ -829,15 +870,17 @@ class OrderManagement {
                                                 ${(order.order_status || 'pending').charAt(0).toUpperCase() + (order.order_status || 'pending').slice(1)}
                                             </span>
                                         </td>
-                                        <td class="px-4 py-2 text-sm">
-                                            <button onclick="orderManagement.viewOrder(${order.id})" 
-                                                    class="text-purple-600 hover:text-purple-900 mr-2">
-                                                View
-                                            </button>
-                                            <button onclick="orderManagement.generateInvoice(${order.id})" 
-                                                    class="text-green-600 hover:text-green-900">
-                                                Invoice
-                                            </button>
+                                        <td class="px-2 sm:px-4 py-2 text-xs sm:text-sm">
+                                            <div class="flex flex-col sm:flex-row gap-1 sm:gap-2">
+                                                <button onclick="orderManagement.viewOrder(${order.id})" 
+                                                        class="text-purple-600 hover:text-purple-900 text-xs">
+                                                    View
+                                                </button>
+                                                <button onclick="orderManagement.generateInvoice(${order.id})" 
+                                                        class="text-green-600 hover:text-green-900 text-xs">
+                                                    Invoice
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 `).join('')}
@@ -846,9 +889,9 @@ class OrderManagement {
                     </div>
                 </div>
                 
-                <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+                <div class="px-4 sm:px-6 py-4 border-t border-gray-200 flex justify-end">
                     <button onclick="orderManagement.closeModal()" 
-                            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
                         Close
                     </button>
                 </div>
