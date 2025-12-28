@@ -4,6 +4,7 @@ class OrderManagement {
         this.currentPage = 1;
         this.pageSize = 20;
         this.currentFilters = {};
+        this.selectedOrders = new Set();
         this.init();
     }
 
@@ -28,8 +29,17 @@ class OrderManagement {
         const statusFilter = document.getElementById('statusFilter');
         if (statusFilter) {
             statusFilter.addEventListener('change', (e) => {
-                this.currentFilters.complete = e.target.value === 'completed' ? 'true' : 
-                                             e.target.value === 'pending' ? 'false' : '';
+                this.currentFilters.order_status = e.target.value;
+                this.currentPage = 1;
+                this.loadOrders();
+            });
+        }
+
+        // Type filter
+        const typeFilter = document.getElementById('typeFilter');
+        if (typeFilter) {
+            typeFilter.addEventListener('change', (e) => {
+                this.currentFilters.order_type = e.target.value;
                 this.currentPage = 1;
                 this.loadOrders();
             });
@@ -39,6 +49,25 @@ class OrderManagement {
         const refreshBtn = document.getElementById('refreshOrders');
         if (refreshBtn) {
             refreshBtn.addEventListener('click', () => this.loadOrders());
+        }
+
+        // Bulk actions
+        const bulkActions = document.getElementById('bulkActions');
+        if (bulkActions) {
+            bulkActions.addEventListener('change', (e) => {
+                if (e.target.value && this.selectedOrders.size > 0) {
+                    this.performBulkAction(e.target.value);
+                    e.target.value = '';
+                }
+            });
+        }
+
+        // Select all checkbox
+        const selectAllCheckbox = document.getElementById('selectAll');
+        if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener('change', (e) => {
+                this.toggleSelectAll(e.target.checked);
+            });
         }
     }
 
@@ -50,12 +79,9 @@ class OrderManagement {
                 ...this.currentFilters
             });
 
-            const response = await fetch(`${this.apiBaseUrl}/orders/?${params}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+            const response = await window.adminRoutes.makeAuthenticatedRequest(
+                `${this.apiBaseUrl}/orders/?${params}`
+            );
 
             if (response.ok) {
                 const data = await response.json();
@@ -74,75 +100,122 @@ class OrderManagement {
         const tbody = document.getElementById('ordersTableBody');
         const cardContainer = document.getElementById('ordersCardContainer');
         
+        const getStatusColor = (status) => {
+            switch(status) {
+                case 'pending': return 'bg-yellow-500/20 text-yellow-400';
+                case 'confirmed': return 'bg-blue-500/20 text-blue-400';
+                case 'completed': return 'bg-green-500/20 text-green-400';
+                case 'cancelled': return 'bg-red-500/20 text-red-400';
+                default: return 'bg-gray-500/20 text-gray-400';
+            }
+        };
+        
         if (tbody) {
             tbody.innerHTML = orders.map(order => `
                 <tr class="hover:bg-gray-50 hover:bg-opacity-5">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <input type="checkbox" class="order-checkbox rounded border-gray-600 bg-gray-700 text-purple-600" 
+                               data-order-id="${order.id}" 
+                               ${this.selectedOrders.has(order.id) ? 'checked' : ''}>
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                         #${order.id}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        ${order.customer_name || 'Guest'}
+                        <span class="px-2 py-1 rounded text-xs ${order.order_type === 'whatsapp' ? 'bg-green-600' : 'bg-blue-600'} text-white">
+                            ${order.order_type || 'N/A'}
+                        </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        ${order.get_cart_items} items
+                        ${order.contact_value || 'N/A'}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                        ${order.user_id || 'N/A'}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                        ${order.get_cart_items || 0}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                        ₹${parseFloat(order.get_cart_total).toFixed(2)}
+                        ₹${parseFloat(order.total_amount || order.get_cart_total || 0).toFixed(2)}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-3 py-1 rounded-full text-xs font-medium ${
-                            order.complete ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
-                        }">
-                            ${order.status}
+                        <span class="px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.order_status || 'pending')}">
+                            ${(order.order_status || 'pending').charAt(0).toUpperCase() + (order.order_status || 'pending').slice(1)}
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                         ${new Date(order.date_ordered).toLocaleDateString()}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                        ${order.transaction_id || 'N/A'}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button onclick="orderManagement.viewOrder(${order.id})" 
                                 class="text-purple-400 hover:text-purple-300 mr-3">
                             View
                         </button>
-                        <button onclick="orderManagement.generateInvoice(${order.id})" 
-                                class="text-green-400 hover:text-green-300 mr-3">
-                            Invoice
-                        </button>
-                        <button onclick="orderManagement.updateOrderStatus(${order.id}, ${!order.complete})" 
-                                class="text-blue-400 hover:text-blue-300">
-                            ${order.complete ? 'Mark Pending' : 'Mark Complete'}
-                        </button>
+                        ${(order.order_status || 'pending') === 'pending' ? `
+                            <button onclick="orderManagement.confirmOrder(${order.id})" 
+                                    class="text-blue-400 hover:text-blue-300 mr-3">
+                                Confirm
+                            </button>
+                        ` : ''}
+                        ${(order.order_status || 'pending') === 'confirmed' ? `
+                            <button onclick="orderManagement.completeOrder(${order.id})" 
+                                    class="text-green-400 hover:text-green-300 mr-3">
+                                Complete
+                            </button>
+                        ` : ''}
+                        ${(order.order_status || 'pending') !== 'cancelled' && (order.order_status || 'pending') !== 'completed' ? `
+                            <button onclick="orderManagement.cancelOrder(${order.id})" 
+                                    class="text-red-400 hover:text-red-300">
+                                Cancel
+                            </button>
+                        ` : ''}
                     </td>
                 </tr>
             `).join('');
         }
         
+        // Add event listeners to checkboxes
+        this.attachOrderEventListeners();
         if (cardContainer) {
             cardContainer.innerHTML = orders.map(order => `
                 <div style="background-color: #1a1a1f; padding: 1.25rem; border-radius: 0.5rem;">
                     <div class="flex justify-between items-start mb-3">
                         <div>
                             <div class="text-white font-bold text-lg">#${order.id}</div>
-                            <div class="text-gray-300 text-sm">${order.customer_name || 'Guest'}</div>
+                            <div class="text-gray-300 text-sm">
+                                <span class="px-2 py-1 rounded text-xs ${order.order_type === 'whatsapp' ? 'bg-green-600' : 'bg-blue-600'} text-white mr-2">
+                                    ${order.order_type === 'whatsapp' ? 'WhatsApp' : 'Email'}
+                                </span>
+                                User: ${order.user_id || 'N/A'}
+                            </div>
                         </div>
-                        <span class="px-3 py-1 rounded-full text-xs font-medium ${
-                            order.complete ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
-                        }">
-                            ${order.status}
+                        <span class="px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.order_status)}">
+                            ${order.order_status.charAt(0).toUpperCase() + order.order_status.slice(1)}
                         </span>
                     </div>
                     <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Contact:</span>
+                            <span class="text-white font-medium">${order.contact_value || 'N/A'}</span>
+                        </div>
                         <div class="flex justify-between">
                             <span class="text-gray-400">Items:</span>
                             <span class="text-white font-medium">${order.get_cart_items}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-400">Amount:</span>
-                            <span class="text-white font-medium">₹${parseFloat(order.get_cart_total).toFixed(2)}</span>
+                            <span class="text-white font-medium">₹${parseFloat(order.total_amount || order.get_cart_total).toFixed(2)}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-400">Date:</span>
                             <span class="text-gray-400">${new Date(order.date_ordered).toLocaleDateString()}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Transaction ID:</span>
+                            <span class="text-gray-400">${order.transaction_id || 'N/A'}</span>
                         </div>
                     </div>
                     <div class="flex gap-2 mt-4">
@@ -150,14 +223,24 @@ class OrderManagement {
                                 class="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm">
                             View
                         </button>
-                        <button onclick="orderManagement.generateInvoice(${order.id})" 
-                                class="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm">
-                            Invoice
-                        </button>
-                        <button onclick="orderManagement.updateOrderStatus(${order.id}, ${!order.complete})" 
-                                class="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm">
-                            ${order.complete ? 'Pending' : 'Complete'}
-                        </button>
+                        ${order.order_status === 'pending' ? `
+                            <button onclick="orderManagement.confirmOrder(${order.id})" 
+                                    class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm">
+                                Confirm
+                            </button>
+                        ` : ''}
+                        ${order.order_status === 'confirmed' ? `
+                            <button onclick="orderManagement.completeOrder(${order.id})" 
+                                    class="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm">
+                                Complete
+                            </button>
+                        ` : ''}
+                        ${order.order_status !== 'cancelled' && order.order_status !== 'completed' ? `
+                            <button onclick="orderManagement.cancelOrder(${order.id})" 
+                                    class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm">
+                                Cancel
+                            </button>
+                        ` : ''}
                     </div>
                 </div>
             `).join('');
@@ -221,8 +304,9 @@ class OrderManagement {
     updateStatistics(stats) {
         const elements = {
             'totalOrders': stats.total_orders,
-            'completedOrders': stats.completed_orders,
             'pendingOrders': stats.pending_orders,
+            'confirmedOrders': stats.confirmed_orders || 0,
+            'completedOrders': stats.completed_orders,
             'totalRevenue': `₹${parseFloat(stats.total_revenue).toFixed(2)}`
         };
 
@@ -276,35 +360,62 @@ class OrderManagement {
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <h4 class="font-medium text-gray-900 mb-2">Customer Information</h4>
-                            <p><strong>Name:</strong> ${order.customer_name || 'Guest'}</p>
-                            <p><strong>Email:</strong> ${order.customer_email || 'N/A'}</p>
-                            <p><strong>Order Date:</strong> ${new Date(order.date_ordered).toLocaleString()}</p>
+                            <p style="color: black"><strong>Name:</strong> ${order.customer_name || 'Guest'}</p>
+                            <p style="color: black"><strong>Email:</strong> ${order.customer_email || 'N/A'}</p>
+                            <p style="color: black"><strong>Order Date:</strong> ${new Date(order.date_ordered).toLocaleString()}</p>
                         </div>
                         
                         <div>
                             <h4 class="font-medium text-gray-900 mb-2">Order Summary</h4>
-                            <p><strong>Status:</strong> 
-                                <span class="px-2 py-1 text-xs rounded-full ${order.complete ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
-                                    ${order.status}
+                            <p style="color: black"><strong>Status:</strong> 
+                                <span class="px-2 py-1 text-xs rounded-full ${(order.order_status || 'pending') === 'completed' ? 'bg-green-100 text-green-800' : (order.order_status || 'pending') === 'confirmed' ? 'bg-blue-100 text-blue-800' : (order.order_status || 'pending') === 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">
+                                    ${(order.order_status || 'pending').charAt(0).toUpperCase() + (order.order_status || 'pending').slice(1)}
                                 </span>
                             </p>
-                            <p><strong>Total Items:</strong> ${order.get_cart_items}</p>
-                            <p><strong>Total Amount:</strong> ₹${parseFloat(order.get_cart_total).toFixed(2)}</p>
-                            <p><strong>Transaction ID:</strong> ${order.transaction_id || 'N/A'}</p>
+                            <p style="color: black"><strong>Order Type:</strong> ${(order.order_type || 'N/A').charAt(0).toUpperCase() + (order.order_type || 'N/A').slice(1)}</p>
+                            <p style="color: black"><strong>Contact:</strong> ${order.contact_value || 'N/A'}</p>
+                            <p style="color: black"><strong>Total Items:</strong> ${order.get_cart_items || 0}</p>
+                            <p style="color: black"><strong>Total Amount:</strong> ₹${parseFloat(order.total_amount || order.get_cart_total || 0).toFixed(2)}</p>
+                            <p style="color: black"><strong>Transaction ID:</strong> ${order.transaction_id || 'N/A'}</p>
                         </div>
                     </div>
                     
                     ${order.shipping_address && order.shipping_address.length > 0 ? `
-                        <div class="mt-6">
-                            <h4 class="font-medium text-gray-900 mb-2">Shipping Address</h4>
-                            <div class="bg-gray-50 p-3 rounded">
-                                ${order.shipping_address.map(addr => `
-                                    <p>${addr.address}</p>
-                                    <p>${addr.city}, ${addr.state} ${addr.zipcode}</p>
-                                `).join('')}
+                        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-medium text-gray-900 mb-2">Shipping Address</h4>
+                                <div class="bg-gray-50 p-3 rounded">
+                                    ${order.shipping_address.map(addr => `
+                                        <p style="color: black">${addr.address}</p>
+                                        <p style="color: black">${addr.city}, ${addr.state} ${addr.zipcode}</p>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-900 mb-2">User Notes</h4>
+                                <div class="bg-gray-50 p-3 rounded">
+                                    ${(order.items || []).filter(item => item.user_note && item.user_note.trim()).length > 0 ? 
+                                        (order.items || []).filter(item => item.user_note && item.user_note.trim()).map(item => `
+                                            <p style="color: black"> ${item.user_note}</p>
+                                        `).join('') : 
+                                        '<p class="text-gray-500">No user notes</p>'
+                                    }
+                                </div>
                             </div>
                         </div>
-                    ` : ''}
+                    ` : `
+                        <div class="mt-6">
+                            <h4 class="font-medium text-gray-900 mb-2">User Notes</h4>
+                            <div class="bg-gray-50 p-3 rounded">
+                                ${(order.items || []).filter(item => item.user_note && item.user_note.trim()).length > 0 ? 
+                                    (order.items || []).filter(item => item.user_note && item.user_note.trim()).map(item => `
+                                        <p style="color: black"> ${item.user_note}</p>
+                                    `).join('') : 
+                                    '<p class="text-gray-500">No user notes</p>'
+                                }
+                            </div>
+                        </div>
+                    `}
                     
                     <div class="mt-6">
                         <h4 class="font-medium text-gray-900 mb-2">Order Items</h4>
@@ -314,15 +425,17 @@ class OrderManagement {
                                     <tr>
                                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
                                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
                                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    ${order.items.map(item => `
+                                    ${(order.items || []).map(item => `
                                         <tr>
-                                            <td class="px-4 py-2 text-sm text-gray-900">${item.product_name}</td>
-                                            <td class="px-4 py-2 text-sm text-gray-500">${item.quantity}</td>
-                                            <td class="px-4 py-2 text-sm text-gray-900">₹${parseFloat(item.total_price).toFixed(2)}</td>
+                                            <td class="px-4 py-2 text-sm text-gray-900">${item.product_name || 'N/A'}</td>
+                                            <td class="px-4 py-2 text-sm text-gray-500">${item.quantity || 0}</td>
+                                            <td class="px-4 py-2 text-sm text-gray-500">₹${parseFloat(item.price_at_order || item.product_price || 0).toFixed(2)}</td>
+                                            <td class="px-4 py-2 text-sm text-gray-900">₹${parseFloat(item.get_total || 0).toFixed(2)}</td>
                                         </tr>
                                     `).join('')}
                                 </tbody>
@@ -355,21 +468,33 @@ class OrderManagement {
         modal.classList.remove('hidden');
     }
 
-    async updateOrderStatus(orderId, complete) {
+    async confirmOrder(orderId) {
+        if (!confirm('Confirm this order?')) return;
+        await this.updateOrderStatus(orderId, 'confirmed');
+    }
+
+    async completeOrder(orderId) {
+        if (!confirm('Mark this order as completed?')) return;
+        await this.updateOrderStatus(orderId, 'completed');
+    }
+
+    async cancelOrder(orderId) {
+        if (!confirm('Cancel this order? This action cannot be undone.')) return;
+        await this.updateOrderStatus(orderId, 'cancelled');
+    }
+
+    async updateOrderStatus(orderId, status) {
         try {
-            const response = await fetch(`${this.apiBaseUrl}/orders/${orderId}/update_status/`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ 
-                    status: complete ? 'delivered' : 'pending'
-                })
-            });
+            const response = await window.adminRoutes.makeAuthenticatedRequest(
+                `${this.apiBaseUrl}/orders/${orderId}/update_status/`,
+                {
+                    method: 'PATCH',
+                    body: JSON.stringify({ status: status })
+                }
+            );
 
             if (response.ok) {
-                this.showSuccess('Order status updated successfully');
+                this.showSuccess(`Order status updated to ${status}`);
                 this.loadOrders();
                 this.loadOrderStatistics();
                 this.closeModal();
@@ -379,6 +504,106 @@ class OrderManagement {
         } catch (error) {
             console.error('Error updating order status:', error);
             this.showError('Failed to update order status');
+        }
+    }
+
+    attachOrderEventListeners() {
+        document.querySelectorAll('.order-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const orderId = parseInt(e.target.dataset.orderId);
+                if (e.target.checked) {
+                    this.selectedOrders.add(orderId);
+                } else {
+                    this.selectedOrders.delete(orderId);
+                }
+                this.updateBulkActionsVisibility();
+            });
+        });
+    }
+
+    toggleSelectAll(checked) {
+        const checkboxes = document.querySelectorAll('.order-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = checked;
+            const orderId = parseInt(checkbox.dataset.orderId);
+            if (checked) {
+                this.selectedOrders.add(orderId);
+            } else {
+                this.selectedOrders.delete(orderId);
+            }
+        });
+        this.updateBulkActionsVisibility();
+    }
+
+    updateBulkActionsVisibility() {
+        const bulkActionsContainer = document.getElementById('bulkActionsContainer');
+        const selectedCount = document.getElementById('selectedCount');
+        
+        if (bulkActionsContainer) {
+            if (this.selectedOrders.size > 0) {
+                bulkActionsContainer.classList.remove('hidden');
+                if (selectedCount) {
+                    selectedCount.textContent = `${this.selectedOrders.size} selected`;
+                }
+            } else {
+                bulkActionsContainer.classList.add('hidden');
+            }
+        }
+    }
+
+    async performBulkAction(action) {
+        if (this.selectedOrders.size === 0) return;
+
+        const orderIds = Array.from(this.selectedOrders);
+        
+        if (action === 'delete') {
+            if (!confirm(`Permanently delete ${orderIds.length} selected orders? This action cannot be undone.`)) return;
+            
+            try {
+                let deletedCount = 0;
+                for (const orderId of orderIds) {
+                    const response = await window.adminRoutes.makeAuthenticatedRequest(
+                        `${this.apiBaseUrl}/orders/${orderId}/`,
+                        { method: 'DELETE' }
+                    );
+                    if (response.ok) deletedCount++;
+                }
+                
+                this.selectedOrders.clear();
+                this.loadOrders();
+                this.loadOrderStatistics();
+                this.showSuccess(`${deletedCount} orders deleted successfully`);
+            } catch (error) {
+                console.error('Bulk delete failed:', error);
+                this.showError('Bulk delete failed');
+            }
+            return;
+        }
+
+        const actionText = action === 'confirm' ? 'confirm' : action === 'complete' ? 'complete' : 'cancel';
+        
+        if (!confirm(`${actionText.charAt(0).toUpperCase() + actionText.slice(1)} ${orderIds.length} selected orders?`)) return;
+
+        try {
+            let successCount = 0;
+            for (const orderId of orderIds) {
+                const response = await window.adminRoutes.makeAuthenticatedRequest(
+                    `${this.apiBaseUrl}/orders/${orderId}/update_status/`,
+                    {
+                        method: 'PATCH',
+                        body: JSON.stringify({ status: action === 'confirm' ? 'confirmed' : action === 'complete' ? 'completed' : 'cancelled' })
+                    }
+                );
+                if (response.ok) successCount++;
+            }
+            
+            this.selectedOrders.clear();
+            this.loadOrders();
+            this.loadOrderStatistics();
+            this.showSuccess(`${successCount} orders ${actionText}ed successfully`);
+        } catch (error) {
+            console.error('Bulk action failed:', error);
+            this.showError('Bulk action failed');
         }
     }
 
@@ -450,112 +675,6 @@ class OrderManagement {
                     .items-table th { background-color: #f8f9fa; }
                     .total-section { text-align: right; margin-top: 20px; }
                     .total-amount { font-size: 18px; font-weight: bold; color: #8b5cf6; }
-                </style>
-            </head>
-            <body>
-                <div class="header">
-                    <div class="company-name">RADHIRRA DESIGNS</div>
-                    <p>Fashion & Lifestyle</p>
-                </div>
-                
-                <div class="invoice-details">
-                    <div class="customer-info">
-                        <h3>Bill To:</h3>
-                        <p><strong>${order.customer_name || 'Guest Customer'}</strong></p>
-                        <p>${order.customer_email || 'N/A'}</p>
-                    </div>
-                    
-                    <div class="order-info">
-                        <h3>Invoice Details:</h3>
-                        <p><strong>Invoice #:</strong> INV-${order.id}</p>
-                        <p><strong>Order #:</strong> ${order.id}</p>
-                        <p><strong>Date:</strong> ${new Date(order.date_ordered).toLocaleDateString()}</p>
-                        <p><strong>Status:</strong> ${order.status}</p>
-                    </div>
-                </div>
-                
-                <table class="items-table">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Quantity</th>
-                            <th>Unit Price</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${order.items.map(item => `
-                            <tr>
-                                <td>${item.product_name}</td>
-                                <td>${item.quantity}</td>
-                                <td>₹${(parseFloat(item.total_price) / item.quantity).toFixed(2)}</td>
-                                <td>₹${parseFloat(item.total_price).toFixed(2)}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-                
-                <div class="total-section">
-                    <p><strong>Total Items: ${order.get_cart_items}</strong></p>
-                    <p class="total-amount">Total Amount: ₹${parseFloat(order.get_cart_total).toFixed(2)}</p>
-                </div>
-                
-                <div style="margin-top: 40px; text-align: center; color: #666; font-size: 12px;">
-                    <p>Thank you for your business!</p>
-                    <p>This is a computer-generated invoice.</p>
-                </div>
-            </body>
-            </html>
-        `;
-        
-        invoiceWindow.document.write(invoiceHTML);
-        invoiceWindow.document.close();
-        
-        setTimeout(() => {
-            invoiceWindow.print();
-        }, 500);
-    }
-
-    async generateInvoice(orderId) {
-        try {
-            const response = await fetch(`${this.apiBaseUrl}/orders/${orderId}/`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.ok) {
-                const order = await response.json();
-                this.createInvoicePDF(order);
-            } else {
-                throw new Error('Failed to load order for invoice');
-            }
-        } catch (error) {
-            console.error('Error generating invoice:', error);
-            this.showError('Failed to generate invoice');
-        }
-    }
-
-    createInvoicePDF(order) {
-        // Create a new window for the invoice
-        const invoiceWindow = window.open('', '_blank');
-        const invoiceHTML = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Invoice #${order.id}</title>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
-                    .header { text-align: center; margin-bottom: 30px; }
-                    .company-name { font-size: 24px; font-weight: bold; color: #8b5cf6; }
-                    .invoice-details { display: flex; justify-content: space-between; margin-bottom: 30px; }
-                    .customer-info, .order-info { width: 45%; }
-                    .items-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-                    .items-table th, .items-table td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-                    .items-table th { background-color: #f8f9fa; }
-                    .total-section { text-align: right; margin-top: 20px; }
-                    .total-amount { font-size: 18px; font-weight: bold; color: #8b5cf6; }
                     @media print { body { margin: 0; } }
                 </style>
             </head>
@@ -583,7 +702,7 @@ class OrderManagement {
                         <p><strong>Invoice #:</strong> INV-${order.id}</p>
                         <p><strong>Order #:</strong> ${order.id}</p>
                         <p><strong>Date:</strong> ${new Date(order.date_ordered).toLocaleDateString()}</p>
-                        <p><strong>Status:</strong> ${order.status}</p>
+                        <p><strong>Status:</strong> ${order.order_status || 'Pending'}</p>
                         ${order.transaction_id ? `<p><strong>Transaction ID:</strong> ${order.transaction_id}</p>` : ''}
                     </div>
                 </div>
@@ -602,8 +721,8 @@ class OrderManagement {
                             <tr>
                                 <td>${item.product_name}</td>
                                 <td>${item.quantity}</td>
-                                <td>₹${(parseFloat(item.total_price) / item.quantity).toFixed(2)}</td>
-                                <td>₹${parseFloat(item.total_price).toFixed(2)}</td>
+                                <td>₹${parseFloat(item.price_at_order || item.product_price || 0).toFixed(2)}</td>
+                                <td>₹${parseFloat(item.get_total || 0).toFixed(2)}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -611,7 +730,7 @@ class OrderManagement {
                 
                 <div class="total-section">
                     <p><strong>Total Items: ${order.get_cart_items}</strong></p>
-                    <p class="total-amount">Total Amount: ₹${parseFloat(order.get_cart_total).toFixed(2)}</p>
+                    <p class="total-amount">Total Amount: ₹${parseFloat(order.total_amount || order.get_cart_total || 0).toFixed(2)}</p>
                 </div>
                 
                 <div style="margin-top: 40px; text-align: center; color: #666; font-size: 12px;">
@@ -625,7 +744,6 @@ class OrderManagement {
         invoiceWindow.document.write(invoiceHTML);
         invoiceWindow.document.close();
         
-        // Auto-print after a short delay
         setTimeout(() => {
             invoiceWindow.print();
         }, 500);
@@ -704,9 +822,11 @@ class OrderManagement {
                                         <td class="px-4 py-2 text-sm text-gray-900">₹${parseFloat(order.get_cart_total).toFixed(2)}</td>
                                         <td class="px-4 py-2 text-sm">
                                             <span class="px-2 py-1 text-xs rounded-full ${
-                                                order.complete ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                                (order.order_status || 'pending') === 'completed' ? 'bg-green-100 text-green-800' : 
+                                                (order.order_status || 'pending') === 'confirmed' ? 'bg-blue-100 text-blue-800' : 
+                                                (order.order_status || 'pending') === 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
                                             }">
-                                                ${order.status}
+                                                ${(order.order_status || 'pending').charAt(0).toUpperCase() + (order.order_status || 'pending').slice(1)}
                                             </span>
                                         </td>
                                         <td class="px-4 py-2 text-sm">

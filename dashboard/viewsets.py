@@ -117,9 +117,9 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     permission_classes = [AdminPermission]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['complete']
-    search_fields = ['user__email', 'user__first_name', 'user__last_name', 'transaction_id']
-    ordering_fields = ['date_ordered', 'id']
+    filterset_fields = ['order_status', 'order_type', 'complete']
+    search_fields = ['user__email', 'user__first_name', 'user__last_name', 'transaction_id', 'contact_value']
+    ordering_fields = ['date_ordered', 'id', 'total_amount']
     ordering = ['-date_ordered']
 
     @action(detail=True, methods=['patch'])
@@ -128,13 +128,17 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = self.get_object()
         serializer = OrderStatusUpdateSerializer(data=request.data)
         if serializer.is_valid():
-            # Note: Current model uses 'complete' boolean, adapt as needed
-            if serializer.validated_data['status'] in ['delivered', 'completed']:
+            status = serializer.validated_data['status']
+            order.order_status = status
+            
+            # Update complete field based on status
+            if status == 'completed':
                 order.complete = True
-            else:
+            elif status in ['pending', 'confirmed']:
                 order.complete = False
+            
             order.save()
-            return Response({'message': 'Order status updated'})
+            return Response({'message': f'Order status updated to {status}'})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['get'])
@@ -142,9 +146,13 @@ class OrderViewSet(viewsets.ModelViewSet):
         """Get order statistics"""
         stats = {
             'total_orders': Order.objects.count(),
-            'completed_orders': Order.objects.filter(complete=True).count(),
-            'pending_orders': Order.objects.filter(complete=False).count(),
-            'total_revenue': sum([order.get_cart_total for order in Order.objects.filter(complete=True)]),
+            'pending_orders': Order.objects.filter(order_status='pending').count(),
+            'confirmed_orders': Order.objects.filter(order_status='confirmed').count(),
+            'completed_orders': Order.objects.filter(order_status='completed').count(),
+            'cancelled_orders': Order.objects.filter(order_status='cancelled').count(),
+            'whatsapp_orders': Order.objects.filter(order_type='whatsapp').count(),
+            'email_orders': Order.objects.filter(order_type='email').count(),
+            'total_revenue': sum([order.total_amount or order.get_cart_total for order in Order.objects.filter(order_status='completed')]),
         }
         return Response(stats)
 

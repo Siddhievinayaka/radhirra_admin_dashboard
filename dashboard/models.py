@@ -97,10 +97,27 @@ class ProductImage(models.Model):
 
 
 class Order(models.Model):
+    ORDER_TYPE_CHOICES = [
+        ('whatsapp', 'WhatsApp'),
+        ('email', 'Email'),
+    ]
+    
+    ORDER_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, blank=True, null=True)
     date_ordered = models.DateTimeField(auto_now_add=True)
     complete = models.BooleanField(default=False)
     transaction_id = models.CharField(max_length=100, blank=True, null=True)
+    order_type = models.CharField(max_length=10, choices=ORDER_TYPE_CHOICES, default='whatsapp')
+    order_status = models.CharField(max_length=10, choices=ORDER_STATUS_CHOICES, default='pending')
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    contact_value = models.CharField(max_length=255, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return f"Order {self.id}"
@@ -127,10 +144,15 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.SET_NULL, blank=True, null=True)
     quantity = models.IntegerField(default=0, blank=True, null=True)
     date_added = models.DateTimeField(auto_now_add=True)
+    price_at_order = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    variant_info = models.CharField(max_length=255, blank=True, null=True)
+    user_note = models.TextField(blank=True, null=True)
     
     @property
     def get_total(self):
-        if self.product:
+        if self.price_at_order > 0:
+            return self.price_at_order * self.quantity
+        elif self.product:
             price = self.product.sale_price or self.product.regular_price
             return price * self.quantity
         return 0
@@ -142,14 +164,15 @@ class OrderItem(models.Model):
 class ShippingAddress(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, blank=True, null=True)
     order = models.ForeignKey(Order, on_delete=models.SET_NULL, blank=True, null=True)
-    address = models.CharField(max_length=200)
-    city = models.CharField(max_length=200)
-    state = models.CharField(max_length=200)
-    zipcode = models.CharField(max_length=200)
+    address = models.CharField(max_length=200, blank=True, null=True)
+    city = models.CharField(max_length=200, blank=True, null=True)
+    state = models.CharField(max_length=200, blank=True, null=True)
+    zipcode = models.CharField(max_length=200, blank=True, null=True)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
     date_added = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return self.address
+        return self.address or f"Address for Order {self.order.id if self.order else 'N/A'}"
     
     class Meta:
         db_table = 'Radhirra_shippingaddress'

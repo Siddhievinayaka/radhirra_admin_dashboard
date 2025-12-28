@@ -84,7 +84,7 @@ class OrderSerializer(serializers.ModelSerializer):
     shipping_address = ShippingAddressSerializer(source='shippingaddress_set', many=True, read_only=True)
     get_cart_total = serializers.ReadOnlyField()
     get_cart_items = serializers.ReadOnlyField()
-    order_status = serializers.SerializerMethodField()
+    user_id = serializers.IntegerField(source='user.id', read_only=True)
     
     class Meta:
         model = Order
@@ -94,9 +94,6 @@ class OrderSerializer(serializers.ModelSerializer):
         if obj.user:
             return f"{obj.user.first_name} {obj.user.last_name}".strip() or obj.user.username
         return "Guest"
-    
-    def get_order_status(self, obj):
-        return "Completed" if obj.complete else "Pending"
 
 
 class CartItemSerializer(serializers.ModelSerializer):
@@ -136,8 +133,7 @@ class ProductBulkUpdateSerializer(serializers.Serializer):
 class OrderStatusUpdateSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=[
         ('pending', 'Pending'),
-        ('processing', 'Processing'),
-        ('shipped', 'Shipped'),
-        ('delivered', 'Delivered'),
+        ('confirmed', 'Confirmed'),
+        ('completed', 'Completed'),
         ('cancelled', 'Cancelled')
     ])

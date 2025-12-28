@@ -11,11 +11,18 @@
   
   <!-- Search and Filter -->
   <div class="mb-6 flex flex-col sm:flex-row gap-4" style="background-color: #1a1a1f; padding: 1.5rem; border-radius: 0.5rem;">
-    <input type="text" id="orderSearch" placeholder="Search by order ID or customer name..." class="flex-1 px-4 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500" />
+    <input type="text" id="orderSearch" placeholder="Search by order ID or contact..." class="flex-1 px-4 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500" />
     <select id="statusFilter" class="px-4 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
-      <option value="">All Orders</option>
-      <option value="completed">Completed</option>
+      <option value="">All Status</option>
       <option value="pending">Pending</option>
+      <option value="confirmed">Confirmed</option>
+      <option value="completed">Completed</option>
+      <option value="cancelled">Cancelled</option>
+    </select>
+    <select id="typeFilter" class="px-4 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+      <option value="">All Types</option>
+      <option value="whatsapp">WhatsApp</option>
+      <option value="email">Email</option>
     </select>
     <button id="refreshOrders" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -24,8 +31,20 @@
     </button>
   </div>
   
+  <!-- Bulk Actions -->
+  <div id="bulkActionsContainer" class="hidden mb-6 flex items-center gap-4" style="background-color: #1a1a1f; padding: 1rem; border-radius: 0.5rem;">
+    <span class="text-white text-sm" id="selectedCount">0 selected</span>
+    <select id="bulkActions" class="px-4 py-2 rounded-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+      <option value="">Bulk Actions</option>
+      <option value="confirm">Confirm Orders</option>
+      <option value="complete">Complete Orders</option>
+      <option value="cancel">Cancel Orders</option>
+      <option value="delete">Delete Orders</option>
+    </select>
+  </div>
+  
   <!-- Stats -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+  <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
     <div style="background-color: #1a1a1f; padding: 1.5rem; border-radius: 0.5rem;">
       <div class="text-gray-400 text-sm mb-1">TOTAL</div>
       <div class="text-white text-2xl font-bold" id="totalOrders">0</div>
@@ -33,6 +52,10 @@
     <div style="background-color: #1a1a1f; padding: 1.5rem; border-radius: 0.5rem;">
       <div class="text-gray-400 text-sm mb-1">PENDING</div>
       <div class="text-white text-2xl font-bold" id="pendingOrders">0</div>
+    </div>
+    <div style="background-color: #1a1a1f; padding: 1.5rem; border-radius: 0.5rem;">
+      <div class="text-gray-400 text-sm mb-1">CONFIRMED</div>
+      <div class="text-white text-2xl font-bold" id="confirmedOrders">0</div>
     </div>
     <div style="background-color: #1a1a1f; padding: 1.5rem; border-radius: 0.5rem;">
       <div class="text-gray-400 text-sm mb-1">COMPLETED</div>
@@ -49,12 +72,18 @@
     <table class="w-full">
       <thead>
         <tr class="border-b border-gray-700">
+          <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">
+            <input type="checkbox" id="selectAll" class="rounded border-gray-600 bg-gray-700 text-purple-600">
+          </th>
           <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Order ID</th>
-          <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Customer</th>
+          <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Type</th>
+          <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Contact</th>
+          <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">User ID</th>
           <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Items</th>
           <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Amount</th>
           <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Status</th>
           <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Date</th>
+          <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Transaction ID</th>
           <th class="text-left px-6 py-4 text-gray-400 font-medium text-sm">Actions</th>
         </tr>
       </thead>
